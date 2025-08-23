@@ -16,9 +16,10 @@ class StockManagement:
         self.stock_workspace_scroll = (By.XPATH, "//div[@class='col layout-main-section-wrapper']/child::div[@class='layout-main-section']")
         self.item_click_xpath = (By.XPATH, "//div[@class='ce-block__content']/child::div[contains(@shortcut_name, 'Item')]/descendant::span[contains(@title, 'Item') and contains(@class, 'ellipsis')]")
         self.filter_set_xpath = (By.XPATH, "//div[@class='filter-selector']/descendant::button[contains(@class, 'filter-button') and contains(@class, 'btn-primary-light')]")
-        # self.filter_input_xpath = (By.XPATH, "//div[contains(@class, 'list_filter') and contains(@class, 'row')]/descendant::input[contains(@class, 'form-control') and contains(@class, 'input-xs')]")
+        self.filter_popup_visible = (By.XPATH, "//div[@id='popover978679']/child::div[contains(@class, 'popover-body') and contains(@class, 'popover-content')]")
         self.filters_input_xpath = (By.XPATH, "//div[@class='awesomplete']/child::input[contains(@class, 'form-control') and contains(@class, 'input-xs') and contains(@role, 'combobox') and contains(@aria-owns, 'awesomplete_list_13')]")
         self.filter_condition_xpath = (By.XPATH, "//div[contains(@class, 'list_filter')  and contains(@class, 'row')]/child::div[contains(@class, 'col-sm-3') and contains(@class, 'form-group')]//select")
+        self.filter_value_xpath = (By.XPATH, "//div[@class='filter-field']/descendant::select")
     
     def stock_page_access(self, filter,equal,value):
         WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located(self.stock_link_xpath))
@@ -41,21 +42,28 @@ class StockManagement:
         self.driver.find_element(*self.filter_set_xpath).click()
         self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/filter_access.png")
         
+        time.sleep(5)
+
+        # check popup visible or not
+        filter_popup = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(self.filter_popup_visible))
+        if filter_popup.is_displayed():
+            print("Element is visible")
+            self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/filter_popup_visible.png")
+        else:
+            print("Element is not visible")
+
         # filter input
-        filter_input = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.filters_input_xpath))
+        filter_input = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.filters_input_xpath))
         filter_input.clear()
-
         filter_input.send_keys(filter)
+        time.sleep(5)
 
-        filter_condition = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.filter_condition_xpath))
+        filter_condition = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.filter_condition_xpath))
         select = Select(filter_condition)
         select.select_by_value(equal)
+        time.sleep(4)
 
-        
-
-        # filters_access = self.driver.find_elements(*self.filters_list_xpath)
-        # data = []
-        # for i in filters_access:
-        #     print(i.text)
-        #     data.append(i.text)
-        # return data
+        filter_value = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.filter_value_xpath))
+        select = Select(filter_value)
+        select.select_by_value(value)
+        time.sleep(4)
