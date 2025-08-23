@@ -9,7 +9,7 @@ import logging
 @allure.description("To open a stock management page")
 @allure.title("To open a stock management page")
 @allure.testcase("TC-0001")
-@pytest.mark.parametrize("useremail, password, filter", "equal", "value", [('pandiarajs2000@gmail.com', 'Test@123', 'Disabled','Equals','Yes')])
+@pytest.mark.parametrize("useremail, password, filter, equal, value", [('pandiarajs2000@gmail.com', 'Test@123', 'Disabled','Equals','Yes')])
 def test_sidemenu_window_title(driver, useremail, password,filter,equal,value):
     logging.info("To get the sidemenu options list")
     login_form = LoginClass(driver)
