@@ -10,3 +10,8 @@ def driver():
     yield driver
     print("\nTear Down for closing the browser")
     driver.quit()
+
+@pytest.fixture
+def excel_sheet():
+    excel_path = "E:\Erpnext Automation\Master_Data.xlsx"
+    return excel_path
