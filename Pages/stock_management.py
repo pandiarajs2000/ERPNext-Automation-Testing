@@ -16,12 +16,16 @@ class StockManagement:
         self.stock_workspace_scroll = (By.XPATH, "//div[@class='col layout-main-section-wrapper']/child::div[@class='layout-main-section']")
         self.item_click_xpath = (By.XPATH, "//div[@class='ce-block__content']/child::div[contains(@shortcut_name, 'Item')]/descendant::span[contains(@title, 'Item') and contains(@class, 'ellipsis')]")
         self.filter_set_xpath = (By.XPATH, "//div[@class='filter-selector']/descendant::button[contains(@class, 'filter-button') and contains(@class, 'btn-primary-light')]")
-        self.filter_popup_visible = (By.XPATH, "//div[@id='popover978679']/child::div[contains(@class, 'popover-body') and contains(@class, 'popover-content')]")
-        self.filters_input_xpath = (By.XPATH, "//div[@class='awesomplete']/child::input[contains(@class, 'form-control') and contains(@class, 'input-xs') and contains(@role, 'combobox') and contains(@aria-owns, 'awesomplete_list_13')]")
-        self.filter_condition_xpath = (By.XPATH, "//div[contains(@class, 'list_filter')  and contains(@class, 'row')]/child::div[contains(@class, 'col-sm-3') and contains(@class, 'form-group')]//select")
-        self.filter_value_xpath = (By.XPATH, "//div[@class='filter-field']/descendant::select")
+        self.add_filter_btn = (By.XPATH, "//div[contains(@class, 'popover-body') and contains(@class, 'popover-content')]/descendant::div[contains(@class, 'filter-action-buttons') and contains(@class, 'mt-2')]//button[contains(text(), '+ Add a Filter')]")
+
+        # add item btn
+        self.item_add_btn = (By.XPATH, "//button[contains(@data-label,'Add Item')]")
+        self.item_add_full_form = (By.XPATH, "//div[@class='modal-dialog']//div[@class='modal-content']/child::div[@class='modal-footer']//div[@class='custom-actions']//button")
+        self.item_code_xpath = (By.XPATH, "//div[contains(@data-fieldname,'__section_1')]//descendant::form//div[contains(@class, 'frappe-control') and contains(@class, 'input-max-width') and contains(@data-fieldname, 'item_code')]/descendant::div[@class='control-input']//input[contains(@data-fieldname, 'item_code') and contains(@type, 'text') and contains(@data-doctype, 'Item')]")
+        self.item_group_xpath = (By.XPATH, "//div[contains(@data-fieldname,'__section_1')]/descendant::form//div[contains(@class, 'frappe-control') and contains(@class, 'input-max-width') and contains(@data-fieldname, 'item_group')]/descendant::div[@class='awesomplete']//input[contains(@data-fieldname, 'item_group') and contains(@type, 'text') and contains(@data-doctype, 'Item')]")
+        self.save_btn_xpath = (By.XPATH, "//div[@class='container']/child::div[contains(@class, 'row') and contains(@class, 'flex') and contains(@class, 'align-center') and contains(@class, 'justify-between') and contains(@class, 'page-head-content')]/child::div[contains(@class, 'col') and contains(@class, 'flex') and contains(@class, 'justify-content-end') and contains(@class, 'page-actions')]/descendant::button[contains(@data-label, 'Save')]")
     
-    def stock_page_access(self, filter,equal,value):
+    def stock_page_access(self):
         WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located(self.stock_link_xpath))
         side_menu_link = self.driver.find_element(*self.stock_link_xpath)
         side_menu_link.click()
@@ -41,29 +45,24 @@ class StockManagement:
         time.sleep(2)
         self.driver.find_element(*self.filter_set_xpath).click()
         self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/filter_access.png")
+        time.sleep(5)
+
+    def add_item(self, item_group, item_code):
+        add_item = self.driver.find_element(*self.item_add_btn)
+        add_item.click()
+        time.sleep(5)
+        item_popup = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_add_full_form))
+        item_popup.click()
+        self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/item_add_full_form.png")
+        time.sleep(5)
+
+        item_code = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_code_xpath))
+        item_code.send_keys(item_code)
         
+        item_group = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_group_xpath))
+        item_group.send_keys(item_group)
+
         time.sleep(5)
 
-        # check popup visible or not
-        filter_popup = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(self.filter_popup_visible))
-        if filter_popup.is_displayed():
-            print("Element is visible")
-            self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/filter_popup_visible.png")
-        else:
-            print("Element is not visible")
-
-        # filter input
-        filter_input = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.filters_input_xpath))
-        filter_input.clear()
-        filter_input.send_keys(filter)
+        self.driver.find_element(self.save_btn_xpath).click()
         time.sleep(5)
-
-        filter_condition = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.filter_condition_xpath))
-        select = Select(filter_condition)
-        select.select_by_value(equal)
-        time.sleep(4)
-
-        filter_value = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.filter_value_xpath))
-        select = Select(filter_value)
-        select.select_by_value(value)
-        time.sleep(4)
