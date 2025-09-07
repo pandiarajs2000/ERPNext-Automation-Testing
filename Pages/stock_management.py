@@ -8,6 +8,7 @@ from selenium.common.exceptions import ElementClickInterceptedException, Timeout
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.actions.wheel_input import ScrollOrigin
 import time
+import openpyxl
 
 class StockManagement:
     def __init__(self, driver):
@@ -15,14 +16,26 @@ class StockManagement:
         self.stock_link_xpath = (By.XPATH,"//div[contains(@class, 'sidebar-item-container') and contains(@item-public, '1')]/descendant::a[contains(@title, 'Stock')]")
         self.stock_workspace_scroll = (By.XPATH, "//div[@class='col layout-main-section-wrapper']/child::div[@class='layout-main-section']")
         self.item_click_xpath = (By.XPATH, "//div[@class='ce-block__content']/child::div[contains(@shortcut_name, 'Item')]/descendant::span[contains(@title, 'Item') and contains(@class, 'ellipsis')]")
-        self.filter_set_xpath = (By.XPATH, "//div[@class='filter-selector']/descendant::button[contains(@class, 'filter-button') and contains(@class, 'btn-primary-light')]")
-        self.add_filter_btn = (By.XPATH, "//div[contains(@class, 'popover-body') and contains(@class, 'popover-content')]/descendant::div[contains(@class, 'filter-action-buttons') and contains(@class, 'mt-2')]//button[contains(text(), '+ Add a Filter')]")
+        # self.filter_set_xpath = (By.XPATH, "//div[@class='filter-selector']/descendant::button[contains(@class, 'filter-button') and contains(@class, 'btn-primary-light')]")
+        # self.add_filter_btn = (By.XPATH, "//div[contains(@class, 'popover-body') and contains(@class, 'popover-content')]/descendant::div[contains(@class, 'filter-action-buttons') and contains(@class, 'mt-2')]//button[contains(text(), '+ Add a Filter')]")
 
         # add item btn
         self.item_add_btn = (By.XPATH, "//button[contains(@data-label,'Add Item')]")
         self.item_add_full_form = (By.XPATH, "//div[@class='modal-dialog']//div[@class='modal-content']/child::div[@class='modal-footer']//div[@class='custom-actions']//button")
-        self.item_code_xpath = (By.XPATH, "//div[contains(@data-fieldname,'__section_1')]//descendant::form//div[contains(@class, 'frappe-control') and contains(@class, 'input-max-width') and contains(@data-fieldname, 'item_code')]/descendant::div[@class='control-input']//input[contains(@data-fieldname, 'item_code') and contains(@type, 'text') and contains(@data-doctype, 'Item')]")
-        self.item_group_xpath = (By.XPATH, "//div[contains(@data-fieldname,'__section_1')]/descendant::form//div[contains(@class, 'frappe-control') and contains(@class, 'input-max-width') and contains(@data-fieldname, 'item_group')]/descendant::div[@class='awesomplete']//input[contains(@data-fieldname, 'item_group') and contains(@type, 'text') and contains(@data-doctype, 'Item')]")
+        self.add_item_popup = (By.CSS_SELECTOR, "div.modal.show div.modal-dialog")
+        self.item_save_popup = (By.XPATH, "//div[@role='dialog']//button[@type='button'][normalize-space()='Save']")
+        self.item_code__two_xpath = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'item_code')]")
+        self.item_code_xpath = (By.XPATH,"//div[@role='dialog']//div//div//div//div//div//div//div//div//div//form//div[@data-fieldtype='Data']//div//div//div//input[@type='text']")
+        self.item_group_xpath = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'item_group')]")
+        self.item_group_options = (By.XPATH, "//div[@class='awesomplete']/child::ul[@id='awesomplete_list_3']//div[@role='option']//p")
+        self.uom = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'stock_uom')]")
+        self.is_stock_item = (By.XPATH, "//div[contains(@data-fieldname, 'column_break0')]/child::form//div[contains(@data-fieldname,'is_stock_item')]")
+        self.opening_stock =(By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'opening_stock')]")
+        self.valuation_rate = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'valuation_rate')]")
+        self.selling_rate = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'standard_rate')]")
+        self.collapse_disable = (By.XPATH, "//div[@data-fieldname='section_break_11']/child::div[contains(@class,'section-head') and contains(@class, 'collapsed')]")
+        self.collapse_enable = (By.XPATH, "//div[@data-fieldname='section_break_11']/child::div[contains(@class,'section-head') and contains(@class, 'collapsible')]")
+        self.description = (By.XPATH, "//div[@class='section-body']/descendant::div[contains(@class,'frappe-control') and contains(@data-fieldname,'description')]")
         self.save_btn_xpath = (By.XPATH, "//div[@class='container']/child::div[contains(@class, 'row') and contains(@class, 'flex') and contains(@class, 'align-center') and contains(@class, 'justify-between') and contains(@class, 'page-head-content')]/child::div[contains(@class, 'col') and contains(@class, 'flex') and contains(@class, 'justify-content-end') and contains(@class, 'page-actions')]/descendant::button[contains(@data-label, 'Save')]")
     
     def stock_page_access(self):
@@ -41,28 +54,93 @@ class StockManagement:
         time.sleep(3)
         move_to_ele.click()
         time.sleep(2)
-        WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.filter_set_xpath))
-        time.sleep(2)
-        self.driver.find_element(*self.filter_set_xpath).click()
-        self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/filter_access.png")
-        time.sleep(5)
 
-    def add_item(self, item_group, item_code):
-        add_item = self.driver.find_element(*self.item_add_btn)
+    def add_item(self, excel_sheet_path, sheet_name):
+        add_item = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.item_add_btn))
+        self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/add_item_btn_click.png")
         add_item.click()
-        time.sleep(5)
-        item_popup = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_add_full_form))
-        item_popup.click()
-        self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/item_add_full_form.png")
-        time.sleep(5)
-
-        item_code = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_code_xpath))
-        item_code.send_keys(item_code)
         
-        item_group = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_group_xpath))
-        item_group.send_keys(item_group)
+        # check popup open
+        # popup = WebDriverWait(self.driver, 20).until(
+        #     EC.visibility_of_element_located(self.add_item_popup)
+        # )
+        # self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/item_popup.png")
+        # popup.find_element(*self.item_code_xpath).send_keys("Sony Earbuds")
+        # print("Popup Element is Visible..")
 
-        time.sleep(5)
+        # time.sleep(5)
+        # save_btn = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_save_popup))
+        # save_btn.click()
 
-        self.driver.find_element(self.save_btn_xpath).click()
-        time.sleep(5)
+        full_form_open = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.item_add_full_form))
+        full_form_open.click()
+        item_datas = get_item_master_datas(excel_sheet_path, sheet_name)
+        print("Item Datas", item_datas)
+        for item in item_datas:
+            item_code = self.driver.find_element(*self.item_code__two_xpath)
+            item_code.send_keys(item['code'])
+            # item_group = self.driver.find_element(*self.item_group_xpath)
+            item_group = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.item_group_xpath))
+            item_group.clear()
+            item_group.send_keys(item['group'])
+            item_group.send_keys(Keys.ARROW_DOWN)
+            time.sleep(0.5)
+            item_group.send_keys(Keys.ENTER)
+            time.sleep(2)
+
+            uom = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable(self.uom))
+            uom.clear()
+            uom.send_keys(item['uom'])
+            uom.send_keys(Keys.ARROW_DOWN)
+            time.sleep(0.5)
+            uom.send_keys(Keys.ENTER)
+            time.sleep(2)
+
+            opening_stock = self.driver.find_element(*self.opening_stock)
+            opening_stock.send_keys(item['opening_stock'])
+
+            maintain_stock = self.driver.find_element(*self.is_stock_item)
+            if maintain_stock.is_selected():
+                print("The checkbox is selected")
+            else:
+                maintain_stock.click()
+                print("The checkbox is not selected.")
+
+            value_rate = self.driver.find_element(*self.valuation_rate)
+            value_rate.send_keys(item['valuation_rate'])
+
+            selling_rate = self.driver.find_element(*self.selling_rate)
+            selling_rate.send_keys(item['selling_rate'])
+            open_desc = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.collapse_disable))
+            open_desc.click()
+            time.sleep(2)
+            open_enable = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.collapse_enable))
+            ActionChains(self.driver).move_to_element(open_enable)
+            self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/description.png")
+            time.sleep(2)
+            description = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.description))
+            description.clear()
+            description.click()
+            description.send_keys(item['description'])
+
+        time.sleep(3)
+
+def get_item_master_datas(excel_file_path, sheet_name):
+    workbook = openpyxl.load_workbook(excel_file_path)
+    sheet = workbook[sheet_name]
+
+    item_data = []
+    for i in range(2, sheet.max_row+1):
+        item_ = {
+            "code" : sheet.cell(row=i, column=1).value,
+            "item_name" : sheet.cell(row=i, column=2).value,
+            "uom" : sheet.cell(row=i, column=3).value,
+            "description" : sheet.cell(row=i, column=4).value,
+            "group" : sheet.cell(row=i, column=5).value,
+            "opening_stock" : sheet.cell(row=i, column=6).value,
+            "valuation_rate" : sheet.cell(row=i, column=7).value,
+            "selling_rate" : sheet.cell(row=i, column=8).value
+        }
+
+        item_data.append(item_)
+    return item_data
