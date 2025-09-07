@@ -1,6 +1,7 @@
 from Pages.login_page import LoginClass
 from Pages.main_page import HomePage
 from Pages.stock_management import StockManagement
+from Utils.utils import read_data
 import pytest
 import time
 import allure
@@ -36,5 +37,7 @@ def test_create_new_item(driver, useremail, password, excel_sheet):
     login_form.alert_window_close()
     stock_page = StockManagement(driver)
     stock_page.stock_page_access()
-    data_sheet = excel_sheet
-    
+    time.sleep(5)
+    excel_sheet = excel_sheet
+    sheet_name = "Item"
+    stock_page.add_item(excel_sheet, sheet_name)
