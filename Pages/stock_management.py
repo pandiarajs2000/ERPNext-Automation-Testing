@@ -35,8 +35,34 @@ class StockManagement:
         self.selling_rate = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'standard_rate')]")
         self.collapse_disable = (By.XPATH, "//div[@data-fieldname='section_break_11']/child::div[contains(@class,'section-head') and contains(@class, 'collapsed')]")
         self.collapse_enable = (By.XPATH, "//div[@data-fieldname='section_break_11']/child::div[contains(@class,'section-head') and contains(@class, 'collapsible')]")
-        self.description = (By.XPATH, "//div[@class='section-body']/descendant::div[contains(@class,'frappe-control') and contains(@data-fieldname,'description')]")
-        self.save_btn_xpath = (By.XPATH, "//div[@class='container']/child::div[contains(@class, 'row') and contains(@class, 'flex') and contains(@class, 'align-center') and contains(@class, 'justify-between') and contains(@class, 'page-head-content')]/child::div[contains(@class, 'col') and contains(@class, 'flex') and contains(@class, 'justify-content-end') and contains(@class, 'page-actions')]/descendant::button[contains(@data-label, 'Save')]")
+        self.description = (By.XPATH, "//div[@class='ql-container ql-snow']//div[@class='ql-editor ql-blank']")
+        self.inventory_tab = (By.XPATH, "//ul[@id='form-tabs']/li[contains(@class, 'nav-item') and contains(@class, 'show')]//a[@data-fieldname='inventory_section']")
+        self.shelf_days = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'shelf_life_in_days')]")
+        self.end_of_life = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'end_of_life')]")
+        self.default_mr_type = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[contains(@class, 'control-input')and contains(@class,'flex') and contains(@class, 'align-center')]//select[contains(@data-fieldname,'default_material_request_type')]")
+        self.valuation_method = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[contains(@class, 'control-input')and contains(@class,'flex') and contains(@class, 'align-center')]//select[contains(@data-fieldname,'valuation_method')]")
+        self.warranty_period = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warranty_period')]")
+        self.weight_per_unit = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'weight_per_unit')]")
+        self.weight_uom = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'weight_uom')]")
+        self.barcode_row_add_btn = (By.XPATH, "//div[@data-fieldname='barcodes']//button[@type='button'][normalize-space()='Add Row']")
+        self.child_table_edit_btn = (By.XPATH, "//div[@class='grid-body']//div[@class='rows']//div[@class='grid-row']//div[contains(@class,'data-row') and contains(@class,'row')]//div[@class='col']")
+        self.barcode_popup = (By.XPATH, "//div[@class='form-in-grid']")
+        self.barcode_sn = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'barcode')]")
+        self.barcode_type = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[contains(@class, 'control-input')and contains(@class,'flex') and contains(@class, 'align-center')]//select[contains(@data-fieldname,'barcode_type')]")
+        self.barcode_uom = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'uom')and contains(@data-doctype, 'Item Barcode')]")
+        self.auto_reorder_collapse_click = (By.XPATH, "//div[@data-fieldname='reorder_section']/child::div[contains(@class,'section-head') and contains(@class, 'collapsed')]")
+        self.auto_reorder_collapse_click = (By.XPATH, "//div[@data-fieldname='reorder_section']/child::div[contains(@class,'section-head') and contains(@class, 'collapsible')]")
+        self.auto_reorder_add_row = (By.XPATH, "//div[@data-fieldname='reorder_levels']//button[@type='button'][normalize-space()='Add Row']")
+        self.reorder_warehouse = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_group')]")
+        self.order_warehouse_option = (By.XPATH,"//div[@class='awesomplete']/child::ul[@id='awesomplete_list_23']//div[@role='option']//p")
+        self.reorder_request_for = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse') and contains(@aria-owns,'awesomplete_list_24')]")
+        self.reorder_request_for_option = (By.XPATH,"//div[@class='awesomplete']/child::ul[@id='awesomplete_list_24']//div[@role='option']//p")
+        self.reorder_warehouse_qty = (By.XPATH,"\//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_reorder_qty')]")
+        self.reorder_purpose = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[contains(@class, 'control-input')and contains(@class,'flex') and contains(@class, 'align-center')]//select[contains(@data-fieldname,'material_request_type') and contains(@data-doctype,'Item Reorder')]")
+
+
+        # self.save_btn_xpath = (By.XPATH, "//div[@class='container']/child::div[contains(@class, 'row') and contains(@class, 'flex') and contains(@class, 'align-center') and contains(@class, 'justify-between') and contains(@class, 'page-head-content')]/child::div[contains(@class, 'col') and contains(@class, 'flex') and contains(@class, 'justify-content-end') and contains(@class, 'page-actions')]/descendant::button[contains(@data-label, 'Save')]")
+        self.save_btn_xpath = (By.XPATH, "//div[@id='page-Item']//button[@data-label='Save']")
     
     def stock_page_access(self):
         WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located(self.stock_link_xpath))
@@ -115,13 +141,27 @@ class StockManagement:
             open_desc.click()
             time.sleep(2)
             open_enable = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.collapse_enable))
-            ActionChains(self.driver).move_to_element(open_enable)
             self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/description.png")
             time.sleep(2)
-            description = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.description))
+            description = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.description))
             description.clear()
             description.click()
+            ActionChains(self.driver).move_to_element(description)
             description.send_keys(item['description'])
+
+            ActionChains(self.driver).scroll_by_amount(0,-100).perform()
+            time.sleep(2)
+
+            # inventory tab
+            inv_tab = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable(self.inventory_tab))
+            inv_tab.click()
+            self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/inventory_tab.png")
+
+            
+
+            # save_btn = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.save_btn_xpath))
+            # save_btn.click()
+            time.sleep(3)
 
         time.sleep(3)
 
