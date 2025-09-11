@@ -4,10 +4,12 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException, InvalidElementStateException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.actions.wheel_input import ScrollOrigin
+import traceback
 import time
+from datetime import datetime
 import openpyxl
 
 class StockManagement:
@@ -50,14 +52,17 @@ class StockManagement:
         self.barcode_sn = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'barcode')]")
         self.barcode_type = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[contains(@class, 'control-input')and contains(@class,'flex') and contains(@class, 'align-center')]//select[contains(@data-fieldname,'barcode_type')]")
         self.barcode_uom = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'uom')and contains(@data-doctype, 'Item Barcode')]")
+        self.close_child_tbl_row = (By.XPATH, "//button[@class='btn btn-secondary btn-sm pull-right grid-collapse-row']")
         self.auto_reorder_collapse_click = (By.XPATH, "//div[@data-fieldname='reorder_section']/child::div[contains(@class,'section-head') and contains(@class, 'collapsed')]")
-        self.auto_reorder_collapse_click = (By.XPATH, "//div[@data-fieldname='reorder_section']/child::div[contains(@class,'section-head') and contains(@class, 'collapsible')]")
+        self.auto_reorder_collapse_visible = (By.XPATH, "//div[@data-fieldname='reorder_section']/child::div[contains(@class,'section-head') and contains(@class, 'collapsible')]")
         self.auto_reorder_add_row = (By.XPATH, "//div[@data-fieldname='reorder_levels']//button[@type='button'][normalize-space()='Add Row']")
-        self.reorder_warehouse = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_group')]")
+        self.auto_reorder_row_edit = (By.XPATH, "//div[@data-name='new-item-reorder-dwasemvhbf']//div[@class='col']")
+        self.reorder_checkin_warehouse = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_group')]")
         self.order_warehouse_option = (By.XPATH,"//div[@class='awesomplete']/child::ul[@id='awesomplete_list_23']//div[@role='option']//p")
         self.reorder_request_for = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse') and contains(@aria-owns,'awesomplete_list_24')]")
         self.reorder_request_for_option = (By.XPATH,"//div[@class='awesomplete']/child::ul[@id='awesomplete_list_24']//div[@role='option']//p")
-        self.reorder_warehouse_qty = (By.XPATH,"\//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_reorder_qty')]")
+        self.reorder_level = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_reorder_level')]")
+        self.reorder_warehouse_qty = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_reorder_qty')]")
         self.reorder_purpose = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[contains(@class, 'control-input')and contains(@class,'flex') and contains(@class, 'align-center')]//select[contains(@data-fieldname,'material_request_type') and contains(@data-doctype,'Item Reorder')]")
 
 
@@ -103,67 +108,171 @@ class StockManagement:
         item_datas = get_item_master_datas(excel_sheet_path, sheet_name)
         print("Item Datas", item_datas)
         for item in item_datas:
-            item_code = self.driver.find_element(*self.item_code__two_xpath)
-            item_code.send_keys(item['code'])
-            # item_group = self.driver.find_element(*self.item_group_xpath)
-            item_group = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.item_group_xpath))
-            item_group.clear()
-            item_group.send_keys(item['group'])
-            item_group.send_keys(Keys.ARROW_DOWN)
-            time.sleep(0.5)
-            item_group.send_keys(Keys.ENTER)
-            time.sleep(2)
+            try:
+                item_code = self.driver.find_element(*self.item_code__two_xpath)
+                item_code.send_keys(item['code'])
+                # item_group = self.driver.find_element(*self.item_group_xpath)
+                item_group = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.item_group_xpath))
+                item_group.clear()
+                item_group.send_keys(item['group'])
+                item_group.send_keys(Keys.ARROW_DOWN)
+                time.sleep(0.5)
+                item_group.send_keys(Keys.ENTER)
+                time.sleep(2)
 
-            uom = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable(self.uom))
-            uom.clear()
-            uom.send_keys(item['uom'])
-            uom.send_keys(Keys.ARROW_DOWN)
-            time.sleep(0.5)
-            uom.send_keys(Keys.ENTER)
-            time.sleep(2)
+                uom = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable(self.uom))
+                uom.clear()
+                uom.send_keys(item['uom'])
+                uom.send_keys(Keys.ARROW_DOWN)
+                time.sleep(0.5)
+                uom.send_keys(Keys.ENTER)
+                time.sleep(2)
 
-            opening_stock = self.driver.find_element(*self.opening_stock)
-            opening_stock.send_keys(item['opening_stock'])
+                opening_stock = self.driver.find_element(*self.opening_stock)
+                opening_stock.send_keys(item['opening_stock'])
 
-            maintain_stock = self.driver.find_element(*self.is_stock_item)
-            if maintain_stock.is_selected():
-                print("The checkbox is selected")
-            else:
-                maintain_stock.click()
-                print("The checkbox is not selected.")
+                maintain_stock = self.driver.find_element(*self.is_stock_item)
+                if maintain_stock.is_selected():
+                    print("The checkbox is selected")
+                else:
+                    maintain_stock.click()
+                    print("The checkbox is not selected.")
 
-            value_rate = self.driver.find_element(*self.valuation_rate)
-            value_rate.send_keys(item['valuation_rate'])
+                value_rate = self.driver.find_element(*self.valuation_rate)
+                value_rate.send_keys(item['valuation_rate'])
 
-            selling_rate = self.driver.find_element(*self.selling_rate)
-            selling_rate.send_keys(item['selling_rate'])
-            open_desc = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.collapse_disable))
-            open_desc.click()
-            time.sleep(2)
-            open_enable = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.collapse_enable))
-            self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/description.png")
-            time.sleep(2)
-            description = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.description))
-            description.clear()
-            description.click()
-            ActionChains(self.driver).move_to_element(description)
-            description.send_keys(item['description'])
+                selling_rate = self.driver.find_element(*self.selling_rate)
+                selling_rate.send_keys(item['selling_rate'])
+                open_desc = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.collapse_disable))
+                open_desc.click()
+                time.sleep(2)
+                open_enable = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.collapse_enable))
+                self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/description.png")
+                time.sleep(2)
+                description = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.description))
+                description.clear()
+                description.click()
+                ActionChains(self.driver).move_to_element(description)
+                description.send_keys(item['description'])
 
-            ActionChains(self.driver).scroll_by_amount(0,-100).perform()
-            time.sleep(2)
+                ActionChains(self.driver).scroll_by_amount(0,-100).perform()
+                time.sleep(2)
 
-            # inventory tab
-            inv_tab = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable(self.inventory_tab))
-            inv_tab.click()
-            self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/inventory_tab.png")
+                # inventory tab
+                inv_tab = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.inventory_tab))
+                inv_tab.click()
+                time.sleep(0.5)
+                # self.driver.implicitly_wait(2)
+                self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/inventory_tab.png")
 
-            
+                # shelf in days
+                shelf_in_days = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.shelf_days))
+                shelf_in_days.clear()
+                shelf_in_days.send_keys(item['shelf_in_days'])
 
-            # save_btn = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.save_btn_xpath))
-            # save_btn.click()
-            time.sleep(3)
+                end_life = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable(self.end_of_life))
+                end_life.click()
+                end_life.clear()
+                print(type(item['end_of_life']))
+                # end_life.send_keys(item['end_of_life'])
+                # end_life.send_keys(Keys.ENTER)
 
-        time.sleep(3)
+                default_mrq_type = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.default_mr_type))
+                select_mr_type = Select(default_mrq_type)
+                select_mr_type.select_by_value(item['default_mr_type'])
+
+                value_method = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.valuation_method))
+                select_value_method = Select(value_method)
+                select_value_method.select_by_value(item['valuation_method'])
+
+                warranty_days = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.warranty_period))
+                warranty_days.clear()
+                warranty_days.send_keys(item['warranty_days'])
+
+                weight_per = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.weight_per_unit))
+                weight_per.clear()
+                weight_per.send_keys(item['weight_per_unit'])
+
+                weight_uom = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.weight_uom))
+                weight_uom.clear()
+                weight_uom.send_keys(item['weight_uom'])
+                weight_uom.send_keys(Keys.ENTER)
+
+                barcode_add = WebDriverWait(self.driver,5).until(EC.element_to_be_clickable(self.barcode_row_add_btn))
+                barcode_add.click()
+                self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/barcode_add_empty.png")
+
+                WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located(self.barcode_popup))
+                time.sleep(0.4)
+
+                barcode_num = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.barcode_sn))
+                barcode_num.clear()
+                barcode_num.send_keys(item['barcode_sn'])
+
+                barcode_sn_type = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.barcode_type))
+                select_barcode_type = Select(barcode_sn_type)
+                select_barcode_type.select_by_value(item['barcode_type'])
+
+                barcode_uoms = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.barcode_uom))
+                barcode_uoms.clear()
+                barcode_uoms.send_keys(item['barcode_uom'])
+                barcode_uoms.send_keys(Keys.ENTER)
+
+                close_child_barcode= WebDriverWait(self.driver,5).until(EC.element_to_be_clickable(self.close_child_tbl_row))
+                close_child_barcode.click()
+
+                open_auto_reorder = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.auto_reorder_collapse_click))
+                open_auto_reorder.click()
+                time.sleep(2)
+                WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.auto_reorder_collapse_visible))
+                self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/auto_reorder.png")
+                time.sleep(2)
+
+                add_auto_reorder = WebDriverWait(self.driver,5).until(EC.element_to_be_clickable(self.auto_reorder_add_row))
+                add_auto_reorder.click()
+                edit_row = WebDriverWait(self.driver,10).until(EC.element_to_be_clickable(self.auto_reorder_row_edit))
+                edit_row.click()
+                self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/auto_reorder_edit_row.png")
+
+                check_in_group = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.reorder_checkin_warehouse))
+                check_in_group.clear()
+                check_in_group.send_keys(item['checkin_warehouse'])
+                check_in_group.send_keys(Keys.ARROW_DOWN)
+                time.sleep(0.3)
+                check_in_group.send_keys(Keys.ENTER)
+
+                request_for_wareshouse = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.reorder_request_for))
+                request_for_wareshouse.clear()
+                request_for_wareshouse.send_keys(item['request_for_wh'])
+                request_for_wareshouse.send_keys(Keys.ARROW_DOWN)
+                time.sleep(0.3)
+                request_for_wareshouse.send_keys(Keys.ENTER)
+
+                re_order_level_reach = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.reorder_level))
+                re_order_level_reach.clear()
+                re_order_level_reach.send_keys(item['reorder_level'])
+
+                re_order_qty = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.reorder_warehouse_qty))
+                re_order_qty.clear()
+                re_order_qty.send_keys(item['reorder_qty'])
+
+                material_type = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.reorder_purpose))
+                material_type_select = Select(material_type)
+                material_type_select.select_by_value(item['barcode_type'])
+
+                
+                save_btn = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.save_btn_xpath))
+                save_btn.click()
+                time.sleep(5)
+            except Exception as e:
+                print("Exception Type", type(e))
+                print("Exception Name:", e.__class__.__name__)
+                tb = traceback.extract_tb(e.__traceback__)
+                for frame in tb:
+                    print(f"File: {frame.filename}, Line: {frame.lineno}, Code: {frame.line}")
+
+
+        time.sleep(5)
 
 def get_item_master_datas(excel_file_path, sheet_name):
     workbook = openpyxl.load_workbook(excel_file_path)
@@ -179,7 +288,22 @@ def get_item_master_datas(excel_file_path, sheet_name):
             "group" : sheet.cell(row=i, column=5).value,
             "opening_stock" : sheet.cell(row=i, column=6).value,
             "valuation_rate" : sheet.cell(row=i, column=7).value,
-            "selling_rate" : sheet.cell(row=i, column=8).value
+            "selling_rate" : sheet.cell(row=i, column=8).value,
+            "shelf_in_days":sheet.cell(row=i, column=9).value,
+            "end_of_life":sheet.cell(row=i, column=10).value,
+            "default_mr_type":sheet.cell(row=i, column=11).value,
+            "valuation_method":sheet.cell(row=i, column=12).value,
+            "warranty_days":sheet.cell(row=i, column=13).value,
+            "weight_per_unit":sheet.cell(row=i, column=14).value,
+            "weight_uom":sheet.cell(row=i, column=15).value,
+            "barcode_sn":sheet.cell(row=1, column=16).value,
+            "barcode_type":sheet.cell(row=i, column=17).value,
+            "barcode_uom":sheet.cell(row=i, column=18).value,
+            "checkin_warehouse":sheet.cell(row=i, column=19).value,
+            "request_for_wh":sheet.cell(row=i, column=20).value,
+            "reorder_level":sheet.cell(row=i, column=21).value,
+            "reorder_qty":sheet.cell(row=i, column=22).value,
+            "mr_type":sheet.cell(row=i, column=23).value
         }
 
         item_data.append(item_)
