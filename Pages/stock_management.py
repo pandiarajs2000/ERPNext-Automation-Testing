@@ -56,7 +56,7 @@ class StockManagement:
         self.auto_reorder_collapse_click = (By.XPATH, "//div[@data-fieldname='reorder_section']/child::div[contains(@class,'section-head') and contains(@class, 'collapsed')]")
         self.auto_reorder_collapse_visible = (By.XPATH, "//div[@data-fieldname='reorder_section']/child::div[contains(@class,'section-head') and contains(@class, 'collapsible')]")
         self.auto_reorder_add_row = (By.XPATH, "//div[@data-fieldname='reorder_levels']//button[@type='button'][normalize-space()='Add Row']")
-        self.auto_reorder_row_edit = (By.XPATH, "//div[@data-name='new-item-reorder-dwasemvhbf']//div[@class='col']")
+        self.auto_reorder_row_edit = (By.XPATH, "//div[@data-fieldname='__column_9']/descendant::div[@class='col']")
         self.reorder_checkin_warehouse = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_group')]")
         self.order_warehouse_option = (By.XPATH,"//div[@class='awesomplete']/child::ul[@id='awesomplete_list_23']//div[@role='option']//p")
         self.reorder_request_for = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse') and contains(@aria-owns,'awesomplete_list_24')]")
@@ -64,6 +64,9 @@ class StockManagement:
         self.reorder_level = (By.XPATH, "//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_reorder_level')]")
         self.reorder_warehouse_qty = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[@class='control-input']//input[contains(@data-fieldname,'warehouse_reorder_qty')]")
         self.reorder_purpose = (By.XPATH,"//div[@class='form-group']/child::div[@class='control-input-wrapper']//div[contains(@class, 'control-input')and contains(@class,'flex') and contains(@class, 'align-center')]//select[contains(@data-fieldname,'material_request_type') and contains(@data-doctype,'Item Reorder')]")
+        self.auto_reorder_tbl_close = (By.XPATH, "//div[@class='grid-row grid-row-open']//button[@class='btn btn-secondary btn-sm pull-right grid-collapse-row']")
+        self.barcode_error_msg = (By.XPATH, "//div[@class='modal-dialog msgprint-dialog']//div[@class='modal-content']/descendant::div[@class='msgprint']")
+        self.success_msg = (By.XPATH, "//div[@id='dialog-container']//div[@id='alert-container']/descendant::div[@class='alert-message']")
 
 
         # self.save_btn_xpath = (By.XPATH, "//div[@class='container']/child::div[contains(@class, 'row') and contains(@class, 'flex') and contains(@class, 'align-center') and contains(@class, 'justify-between') and contains(@class, 'page-head-content')]/child::div[contains(@class, 'col') and contains(@class, 'flex') and contains(@class, 'justify-content-end') and contains(@class, 'page-actions')]/descendant::button[contains(@data-label, 'Save')]")
@@ -154,8 +157,6 @@ class StockManagement:
                 description.click()
                 ActionChains(self.driver).move_to_element(description)
                 description.send_keys(item['description'])
-
-                ActionChains(self.driver).scroll_by_amount(0,-100).perform()
                 time.sleep(2)
 
                 # inventory tab
@@ -173,9 +174,10 @@ class StockManagement:
                 end_life = WebDriverWait(self.driver, 5).until(EC.element_to_be_clickable(self.end_of_life))
                 end_life.click()
                 end_life.clear()
-                print(type(item['end_of_life']))
-                # end_life.send_keys(item['end_of_life'])
-                # end_life.send_keys(Keys.ENTER)
+                date_value = item['end_of_life']
+                if isinstance(date_value, datetime):
+                    date_val = date_value.strftime("%d-%m-%Y")
+                end_life.send_keys(date_val)
 
                 default_mrq_type = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.default_mr_type))
                 select_mr_type = Select(default_mrq_type)
@@ -230,7 +232,7 @@ class StockManagement:
 
                 add_auto_reorder = WebDriverWait(self.driver,5).until(EC.element_to_be_clickable(self.auto_reorder_add_row))
                 add_auto_reorder.click()
-                edit_row = WebDriverWait(self.driver,10).until(EC.element_to_be_clickable(self.auto_reorder_row_edit))
+                edit_row = WebDriverWait(self.driver,10).until(EC.presence_of_element_located(self.auto_reorder_row_edit))
                 edit_row.click()
                 self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/auto_reorder_edit_row.png")
 
@@ -238,8 +240,9 @@ class StockManagement:
                 check_in_group.clear()
                 check_in_group.send_keys(item['checkin_warehouse'])
                 check_in_group.send_keys(Keys.ARROW_DOWN)
-                time.sleep(0.3)
+                time.sleep(0.5)
                 check_in_group.send_keys(Keys.ENTER)
+                time.sleep(2)
 
                 request_for_wareshouse = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.reorder_request_for))
                 request_for_wareshouse.clear()
@@ -247,6 +250,7 @@ class StockManagement:
                 request_for_wareshouse.send_keys(Keys.ARROW_DOWN)
                 time.sleep(0.3)
                 request_for_wareshouse.send_keys(Keys.ENTER)
+                time.sleep(2)
 
                 re_order_level_reach = WebDriverWait(self.driver,5).until(EC.presence_of_element_located(self.reorder_level))
                 re_order_level_reach.clear()
@@ -258,20 +262,37 @@ class StockManagement:
 
                 material_type = WebDriverWait(self.driver, 5).until(EC.presence_of_element_located(self.reorder_purpose))
                 material_type_select = Select(material_type)
-                material_type_select.select_by_value(item['barcode_type'])
+                material_type_select.select_by_value(item['mr_type'])
 
-                
-                save_btn = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.save_btn_xpath))
+                close_auto_reoder_table = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.auto_reorder_tbl_close))
+                close_auto_reoder_table.click()
+
+                ActionChains(self.driver).scroll_by_amount(0,-50).perform()
+
+                save_btn = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.save_btn_xpath))
                 save_btn.click()
-                time.sleep(5)
+                time.sleep(0.5)
+                self.driver.get_screenshot_as_file("E:/Erpnext Automation/Screenshots/barcode_error.png")
+                try:
+                    barcode_error = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(self.barcode_error_msg))
+                    error_msg = barcode_error.text
+                    print("Error Msg =>", error_msg)
+                    time.sleep(5)
+                except Exception as e:
+                    pass
+                try:
+                    success_message = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located(self.success_msg))
+                    item_saved_msg = success_message.text
+                    time.sleep(5)
+                except Exception as e:
+                    pass
+                return {"error": error_msg, "success": item_saved_msg}
             except Exception as e:
                 print("Exception Type", type(e))
                 print("Exception Name:", e.__class__.__name__)
                 tb = traceback.extract_tb(e.__traceback__)
                 for frame in tb:
                     print(f"File: {frame.filename}, Line: {frame.lineno}, Code: {frame.line}")
-
-
         time.sleep(5)
 
 def get_item_master_datas(excel_file_path, sheet_name):
@@ -281,29 +302,29 @@ def get_item_master_datas(excel_file_path, sheet_name):
     item_data = []
     for i in range(2, sheet.max_row+1):
         item_ = {
-            "code" : sheet.cell(row=i, column=1).value,
-            "item_name" : sheet.cell(row=i, column=2).value,
-            "uom" : sheet.cell(row=i, column=3).value,
-            "description" : sheet.cell(row=i, column=4).value,
-            "group" : sheet.cell(row=i, column=5).value,
-            "opening_stock" : sheet.cell(row=i, column=6).value,
-            "valuation_rate" : sheet.cell(row=i, column=7).value,
-            "selling_rate" : sheet.cell(row=i, column=8).value,
-            "shelf_in_days":sheet.cell(row=i, column=9).value,
-            "end_of_life":sheet.cell(row=i, column=10).value,
-            "default_mr_type":sheet.cell(row=i, column=11).value,
-            "valuation_method":sheet.cell(row=i, column=12).value,
-            "warranty_days":sheet.cell(row=i, column=13).value,
-            "weight_per_unit":sheet.cell(row=i, column=14).value,
-            "weight_uom":sheet.cell(row=i, column=15).value,
-            "barcode_sn":sheet.cell(row=1, column=16).value,
-            "barcode_type":sheet.cell(row=i, column=17).value,
-            "barcode_uom":sheet.cell(row=i, column=18).value,
-            "checkin_warehouse":sheet.cell(row=i, column=19).value,
-            "request_for_wh":sheet.cell(row=i, column=20).value,
-            "reorder_level":sheet.cell(row=i, column=21).value,
-            "reorder_qty":sheet.cell(row=i, column=22).value,
-            "mr_type":sheet.cell(row=i, column=23).value
+            "code" : sheet.cell(row=i, column=5).value,
+            "item_name" : sheet.cell(row=i, column=6).value,
+            "uom" : sheet.cell(row=i, column=7).value,
+            "description" : sheet.cell(row=i, column=8).value,
+            "group" : sheet.cell(row=i, column=9).value,
+            "opening_stock" : sheet.cell(row=i, column=10).value,
+            "valuation_rate" : sheet.cell(row=i, column=11).value,
+            "selling_rate" : sheet.cell(row=i, column=12).value,
+            "shelf_in_days":sheet.cell(row=i, column=13).value,
+            "end_of_life":sheet.cell(row=i, column=14).value,
+            "default_mr_type":sheet.cell(row=i, column=15).value,
+            "valuation_method":sheet.cell(row=i, column=16).value,
+            "warranty_days":sheet.cell(row=i, column=17).value,
+            "weight_per_unit":sheet.cell(row=i, column=18).value,
+            "weight_uom":sheet.cell(row=i, column=19).value,
+            "barcode_sn":sheet.cell(row=1, column=20).value,
+            "barcode_type":sheet.cell(row=i, column=21).value,
+            "barcode_uom":sheet.cell(row=i, column=22).value,
+            "checkin_warehouse":sheet.cell(row=i, column=23).value,
+            "request_for_wh":sheet.cell(row=i, column=24).value,
+            "reorder_level":sheet.cell(row=i, column=25).value,
+            "reorder_qty":sheet.cell(row=i, column=26).value,
+            "mr_type":sheet.cell(row=i, column=27).value
         }
 
         item_data.append(item_)
