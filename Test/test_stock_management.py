@@ -45,18 +45,152 @@ def test_create_new_item(driver, useremail, password, excel_sheet):
     time.sleep(5)
     excel_sheet = excel_sheet
     sheet_name = "Item"
-    response = stock_page.add_item(excel_sheet, sheet_name)
+    rows = 3
+    response = stock_page.add_item(excel_sheet, sheet_name, rows)
     expected_msg = "Saved"
-    if response["success"]:
-        logger.info("Response", response['success'])
-        status = "PASS"
-        comment = response['success']
-        assert response["success"] == expected_msg, f"Actual Error Message {response['success']}"
-    elif response["error_msg"]:
-        status = "FAIL"
-        comment= response["error_msg"]
-    else:
-        status = "Error"
-        comment = "None of these above"
+    try:
+        if response.get("success"):
+            assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
+            logger.info("Response", response.get("success"))
+            status = "PASS"
+            comment = response['success']
+        elif response.get("error"):
+            status = "FAIL"
+            comment= response.get("error")
+            assert False, f"Unexpected Error Message: {response.get('error')}"
+        else:
+            status = "Error"
+            comment = "None of these above"
+            assert False, "Neither success nor error message was returned"
+    except Exception as e:
+        status = "Fail"
+        comment = str(e)
+        raise
+    
+    write_data(excel_sheet,sheet_name, row=rows, column=28,data = status,col2=30, value2=comment)
 
-    write_data(excel_sheet,sheet_name, row=2, column=28,data = status,col2=30, value2=comment)
+
+@allure.description("Create a new Item without barcode")
+@allure.title("Create a new Item without barcode")
+@allure.testcase("TC-0002")
+@pytest.mark.parametrize("useremail, password", [('pandiarajs2000@gmail.com', 'Test@123')])
+def test_create_new_item_without_barcode(driver, useremail, password, excel_sheet):
+    logger.info("Login")
+    login_form = LoginClass(driver)
+    login_form.login_form()
+    login_form.login_form_field(useremail, password)
+    login_form.alert_window_close()
+    logger.info("Alert Window Closed..")
+    stock_page = StockManagement(driver)
+    logger.info("Open a Stock Workspace.")
+    stock_page.stock_page_access()
+    time.sleep(5)
+    excel_sheet = excel_sheet
+    sheet_name = "Item"
+    rows = 3
+    response = stock_page.add_item(excel_sheet, sheet_name, rows)
+    expected_msg = "Saved"
+    try:
+        if response.get("success"):
+            assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
+            logger.info("Response", response.get("success"))
+            status = "PASS"
+            comment = response['success']
+        elif response.get("error"):
+            status = "FAIL"
+            comment= response.get("error")
+            assert False, f"Unexpected Error Message: {response.get('error')}"
+        else:
+            status = "Error"
+            comment = "None of these above"
+            assert False, "Neither success nor error message was returned"
+    except Exception as e:
+        status = "Fail"
+        comment = str(e)
+        raise
+    
+    write_data(excel_sheet,sheet_name, row=rows, column=28,data = status,col2=30, value2=comment)
+
+
+@allure.description("Existing Item Should not be added")
+@allure.title("Existing Item Should not be added")
+@allure.testcase("TC-0003")
+@pytest.mark.parametrize("useremail, password", [('pandiarajs2000@gmail.com', 'Test@123')])
+def test_existing_item_validation(driver, useremail, password, excel_sheet):
+    logger.info("Login")
+    login_form = LoginClass(driver)
+    login_form.login_form()
+    login_form.login_form_field(useremail, password)
+    login_form.alert_window_close()
+    logger.info("Alert Window Closed..")
+    stock_page = StockManagement(driver)
+    logger.info("Open a Stock Workspace.")
+    stock_page.stock_page_access()
+    time.sleep(5)
+    excel_sheet = excel_sheet
+    sheet_name = "Item"
+    rows = 4
+    response = stock_page.add_item(excel_sheet, sheet_name, rows)
+    expected_msg = "Saved"
+    try:
+        if response.get("success"):
+            assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
+            logger.info("Response", response.get("success"))
+            status = "PASS"
+            comment = response['success']
+        elif response.get("error"):
+            status = "FAIL"
+            comment= response.get("error")
+            assert False, f"Unexpected Error Message: {response.get('error')}"
+        else:
+            status = "Error"
+            comment = "None of these above"
+            assert False, "Neither success nor error message was returned"
+    except Exception as e:
+        status = "Fail"
+        comment = str(e)
+        raise
+    
+    write_data(excel_sheet,sheet_name, row=rows, column=28,data = status,col2=30, value2=comment)
+
+
+@allure.description("Without Item Code the document should not be saved")
+@allure.title("Without Item Code the document should not be saved")
+@allure.testcase("TC-0004")
+@pytest.mark.parametrize("useremail, password", [('pandiarajs2000@gmail.com', 'Test@123')])
+def test_existing_item_validation(driver, useremail, password, excel_sheet):
+    logger.info("Login")
+    login_form = LoginClass(driver)
+    login_form.login_form()
+    login_form.login_form_field(useremail, password)
+    login_form.alert_window_close()
+    logger.info("Alert Window Closed..")
+    stock_page = StockManagement(driver)
+    logger.info("Open a Stock Workspace.")
+    stock_page.stock_page_access()
+    time.sleep(5)
+    excel_sheet = excel_sheet
+    sheet_name = "Item"
+    rows = 4
+    response = stock_page.add_item(excel_sheet, sheet_name, rows)
+    expected_msg = "Saved"
+    try:
+        if response.get("success"):
+            assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
+            logger.info("Response", response.get("success"))
+            status = "PASS"
+            comment = response['success']
+        elif response.get("error"):
+            status = "FAIL"
+            comment= response.get("error")
+            assert False, f"Unexpected Error Message: {response.get('error')}"
+        else:
+            status = "Error"
+            comment = "None of these above"
+            assert False, "Neither success nor error message was returned"
+    except Exception as e:
+        status = "Fail"
+        comment = str(e)
+        raise
+    finally:
+        write_data(excel_sheet,sheet_name, row=rows, column=28,data = status,col2=30, value2=comment)
