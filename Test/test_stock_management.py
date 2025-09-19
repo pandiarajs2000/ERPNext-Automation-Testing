@@ -47,7 +47,7 @@ def test_create_new_item(driver, useremail, password, excel_sheet):
     sheet_name = "Item"
     rows = 3
     response = stock_page.add_item(excel_sheet, sheet_name, rows)
-    expected_msg = "Saved"
+    expected_msg = "Enabled"
     try:
         if response.get("success"):
             assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
@@ -89,7 +89,7 @@ def test_create_new_item_without_barcode(driver, useremail, password, excel_shee
     sheet_name = "Item"
     rows = 3
     response = stock_page.add_item(excel_sheet, sheet_name, rows)
-    expected_msg = "Saved"
+    expected_msg = "Enabled"
     try:
         if response.get("success"):
             assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
@@ -131,7 +131,7 @@ def test_existing_item_validation(driver, useremail, password, excel_sheet):
     sheet_name = "Item"
     rows = 4
     response = stock_page.add_item(excel_sheet, sheet_name, rows)
-    expected_msg = "Saved"
+    expected_msg = "Enabled"
     try:
         if response.get("success"):
             assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
@@ -173,7 +173,7 @@ def test_existing_item_validation(driver, useremail, password, excel_sheet):
     sheet_name = "Item"
     rows = 4
     response = stock_page.add_item(excel_sheet, sheet_name, rows)
-    expected_msg = "Saved"
+    expected_msg = "Enabled"
     try:
         if response.get("success"):
             assert response.get("success") == expected_msg, f"Actual Error Message {response.get('success')}, Expected Message: {response.get('error')}"
