@@ -22,9 +22,14 @@ class StockTransaction:
         self.stock_link_xpath = (By.XPATH,"//a[@title='Stock']")
         self.stock_workspace_scroll = (By.XPATH, "//div[@class='layout-main-section']")
         self.stock_transactions_cards = (By.XPATH, "//div[@card_name='Stock Transactions']")
-        self.stock_transactions_cards_list = (By.XPATH, "//div[@card_name='Stock Transactions']/descendant::span[@class='link-content ellipsis']//span[@class='link-text']")
+        self.stock_transactions_cards_list = (By.XPATH, "//div[@card_name='Stock Transactions']/descendant::span[@class='link-text']")
 
-    def stock_page_access(self):
+        # xpath for Material Request Screen
+        self.search_box_xpath = (By.XPATH, "//input[@id='navbar-search']")
+        self.add_material_request = (By.XPATH, "//button[@data-label='Add Material Request']")
+
+
+    def stock_transactions_cards_list_data(self):
         WebDriverWait(self.driver, 10).until(EC.presence_of_all_elements_located(self.stock_link_xpath))
         side_menu_link = self.driver.find_element(*self.stock_link_xpath)
         side_menu_link.click()
@@ -40,15 +45,41 @@ class StockTransaction:
         time.sleep(3)
         move_to_ele.click()
 
+        time.sleep(2)
+
+        self.driver.execute_script("""
+        document.querySelectorAll('a').forEach(a => {
+            a.addEventListener('click', e => e.preventDefault());
+        });
+    """)
+
         cards_list = WebDriverWait(self.driver, 10).until(
-        EC.visibility_of_all_elements_located(self.stock_transactions_cards_list))
+        EC.presence_of_all_elements_located(self.stock_transactions_cards_list))
 
         # Fetch text safely without clicking
         card_texts = []
         for card in cards_list:
-            text = card.get_attribute("innerText").strip()
+            text = self.driver.execute_script("return arguments[0].textContent;", card).strip()
             if text:
-                print("cards", text)
                 card_texts.append(text)
 
         return card_texts
+
+    def open_mr_page(self):
+        logger.info("Search Box Open..")
+        search_input = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located(self.search_box_xpath))
+        search_input.send_keys('Material Request List')
+        logger.info("Search Box Input Send")
+        time.sleep(1)
+        search_input.send_keys(Keys.ENTER)
+        self.driver.implicitly_wait(3)
+        add_mr = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable(self.add_material_request))
+        logger.info("Add Button Click")
+        add_mr.click()
+        logger.info("Open a Material Request Screen.")
+        # take a screenshot
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        screenshot_path = f"E:/Erpnext Automation/Screenshots/screenshot_{timestamp}.png"
+
+        self.driver.save_screenshot(screenshot_path)
+        return self.driver.current_url
