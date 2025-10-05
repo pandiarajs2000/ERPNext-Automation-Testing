@@ -25,6 +25,24 @@ def test_get_stock_trans_link(driver, useremail, password):
     login_form.login_form_field(useremail, password)
     login_form.alert_window_close()
     stock_page = StockTransaction(driver)
-    response = stock_page.stock_page_access()
+    response = stock_page.stock_transactions_cards_list_data()
     print(response)
+    time.sleep(3)
+
+@allure.description("To open a Material Request Screen")
+@allure.title("To open a Material Request Screen")
+@allure.testcase("TC-0002")
+@pytest.mark.parametrize("useremail, password", [('pandiarajs2000@gmail.com', 'Test@123')])
+def test_material_request_screen(driver, useremail, password, excel_sheet):
+    login_form = LoginClass(driver)
+    login_form.login_form()
+    login_form.login_form_field(useremail, password)
+    login_form.alert_window_close()
+    stock_page = StockTransaction(driver)
+    excel_sheet_path = excel_sheet
+    print("Excel Sheet Path", excel_sheet_path)
+    # transaction_page='Material Request'
+    url = stock_page.open_mr_page()
+    
+    print("Current URL:", url)
     time.sleep(3)
